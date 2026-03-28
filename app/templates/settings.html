@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Настройки — Веб-мониторинг{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">⚙️ Настройки уведомлений</h1>
+    <p class="page-subtitle">Настройте каналы уведомлений и параметры мониторинга</p>
+</div>
+
+{% if success %}
+<div class="alert alert-success">✅ {{ success }}</div>
+{% endif %}
+{% if error %}
+<div class="alert alert-error">⚠️ {{ error }}</div>
+{% endif %}
+
+<form method="POST" action="/settings">
+    <div class="settings-grid">
+        <!-- Telegram -->
+        <div class="card">
+            <h2 class="card-title">📱 Telegram</h2>
+
+            <div class="toggle-group">
+                <label class="toggle">
+                    <input type="hidden" name="telegram_notifications" value="false">
+                    <input type="checkbox" name="telegram_notifications" value="true" {% if
+                        settings.telegram_notifications %}checked{% endif %}>
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">Уведомления в Telegram</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="telegram_chat_id">Chat ID</label>
+                <input type="text" id="telegram_chat_id" name="telegram_chat_id" class="form-input"
+                    value="{{ settings.telegram_chat_id or '' }}" placeholder="123456789">
+                <p class="form-hint">
+                    Узнайте свой Chat ID у бота <a href="https://t.me/userinfobot" target="_blank"
+                        style="color: var(--accent-secondary);">@userinfobot</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div class="card">
+            <h2 class="card-title">📧 Email</h2>
+
+            <div class="toggle-group">
+                <label class="toggle">
+                    <input type="hidden" name="email_notifications" value="false">
+                    <input type="checkbox" name="email_notifications" value="true" {% if settings.email_notifications
+                        %}checked{% endif %}>
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">Уведомления на Email</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="notification_email">Email для уведомлений</label>
+                <input type="email" id="notification_email" name="notification_email" class="form-input"
+                    value="{{ settings.notification_email or '' }}" placeholder="your@email.com">
+            </div>
+        </div>
+
+        <!-- SMTP настройки -->
+        <div class="card">
+            <h2 class="card-title">🔧 SMTP настройки</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Для отправки email-уведомлений укажите SMTP-сервер
+            </p>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="smtp_server">SMTP сервер</label>
+                    <input type="text" id="smtp_server" name="smtp_server" class="form-input"
+                        value="{{ settings.smtp_server or 'smtp.gmail.com' }}" placeholder="smtp.gmail.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="smtp_port">Порт</label>
+                    <input type="number" id="smtp_port" name="smtp_port" class="form-input"
+                        value="{{ settings.smtp_port or 587 }}" placeholder="587">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="smtp_email">Email (логин)</label>
+                <input type="email" id="smtp_email" name="smtp_email" class="form-input"
+                    value="{{ settings.smtp_email or '' }}" placeholder="your@gmail.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="smtp_password">Пароль приложения</label>
+                <input type="password" id="smtp_password" name="smtp_password" class="form-input"
+                    value="{{ settings.smtp_password or '' }}" placeholder="••••••••">
+                <p class="form-hint">
+                    Для Gmail используйте <a href="https://myaccount.google.com/apppasswords" target="_blank"
+                        style="color: var(--accent-secondary);">пароль приложения</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Общие настройки -->
+        <div class="card">
+            <h2 class="card-title">🕐 Общие настройки</h2>
+
+            <div class="form-group">
+                <label class="form-label" for="default_check_interval">
+                    Интервал проверки по умолчанию (минуты)
+                </label>
+                <input type="number" id="default_check_interval" name="default_check_interval" class="form-input"
+                    value="{{ settings.default_check_interval or 10 }}" min="1" max="1440">
+                <p class="form-hint">
+                    Применяется для новых отслеживаний. Каждое отслеживание может иметь свой интервал.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+        <button type="submit" class="btn btn-primary">
+            💾 Сохранить настройки
+        </button>
+    </div>
+</form>
+{% endblock %}

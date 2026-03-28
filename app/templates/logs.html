@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Журнал проверок — Веб-мониторинг{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📋 Журнал проверок</h1>
+    <p class="page-subtitle">История всех проверок и обнаруженных изменений</p>
+</div>
+
+<!-- Фильтр -->
+<div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.5rem;">
+    <div class="filter-bar">
+        <span style="color: var(--text-secondary); font-size: 0.9rem;">🔍 Фильтр:</span>
+        <select id="log-filter" class="form-select">
+            <option value="">Все отслеживания</option>
+            {% for t in trackings %}
+            <option value="{{ t.id }}" {% if current_tracking_id==t.id %}selected{% endif %}>
+                {{ t.name or t.url[:40] }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="card">
+    {% if logs %}
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Отслеживание</th>
+                    <th>Старое значение</th>
+                    <th>Новое значение</th>
+                    <th>Время проверки</th>
+                    <th>Результат</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr class="{% if log.is_changed %}log-changed{% endif %}">
+                    <td>
+                        {% if log.tracking_id in tracking_map %}
+                        <strong>{{ tracking_map[log.tracking_id].name or '—' }}</strong>
+                        <br>
+                        <span class="url-text" style="font-size: 0.75rem;">
+                            {{ tracking_map[log.tracking_id].url[:35] }}
+                        </span>
+                        {% else %}
+                        <span style="color: var(--text-muted);">Удалено</span>
+                        {% endif %}
+                    </td>
+                    <td class="value-text" title="{{ log.old_value or '' }}">
+                        {{ (log.old_value or '—')[:30] }}
+                    </td>
+                    <td class="value-text" title="{{ log.new_value or '' }}">
+                        {{ (log.new_value or '—')[:30] }}
+                    </td>
+                    <td class="time-text">
+                        {{ log.checked_at.strftime('%d.%m.%Y %H:%M:%S') }}
+                    </td>
+                    <td>
+                        {% if log.is_changed %}
+                        <span class="badge badge-success">✅ Изменено</span>
+                        {% else %}
+                        <span class="badge badge-neutral">— Без изменений</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Пагинация -->
+    <div class="pagination">
+        {% if page > 1 %}
+        <a
+            href="/logs?page={{ page - 1 }}{% if current_tracking_id %}&tracking_id={{ current_tracking_id }}{% endif %}">
+            ← Назад
+        </a>
+        {% endif %}
+        <span class="current-page">{{ page }}</span>
+        {% if has_next %}
+        <a
+            href="/logs?page={{ page + 1 }}{% if current_tracking_id %}&tracking_id={{ current_tracking_id }}{% endif %}">
+            Далее →
+        </a>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <div class="empty-state-text">Журнал пуст</div>
+        <div class="empty-state-hint">Записи появятся после первой автоматической проверки</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

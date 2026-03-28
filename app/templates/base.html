@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Веб-мониторинг{% endblock %}</title>
+    <meta name="description" content="Система мониторинга изменений на веб-страницах с уведомлениями">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    {% if user %}
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <span class="logo-icon">◉</span>
+                <span>Мониторинг</span>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">
+                    <span class="nav-icon">📊</span> Дашборд
+                </a>
+                <a href="/logs" class="nav-link {% if request.url.path == '/logs' %}active{% endif %}">
+                    <span class="nav-icon">📋</span> Журнал
+                </a>
+                <a href="/settings" class="nav-link {% if request.url.path == '/settings' %}active{% endif %}">
+                    <span class="nav-icon">⚙️</span> Настройки
+                </a>
+            </div>
+            <div class="nav-user">
+                <span class="user-email">{{ user.email }}</span>
+                <a href="/logout" class="btn-logout">Выход</a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

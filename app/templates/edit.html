@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Редактирование — Веб-мониторинг{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">✏️ Редактирование отслеживания</h1>
+    <p class="page-subtitle">Измените параметры мониторинга</p>
+</div>
+
+{% if error %}
+<div class="alert alert-error">⚠️ {{ error }}</div>
+{% endif %}
+
+<div class="card" style="max-width: 700px;">
+    <form method="POST" action="/tracking/{{ tracking.id }}/edit">
+        <div class="form-group">
+            <label class="form-label" for="url">URL страницы</label>
+            <input type="url" id="url" name="url" class="form-input" value="{{ tracking.url }}" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="name">Название</label>
+            <input type="text" id="name" name="name" class="form-input" value="{{ tracking.name or '' }}">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="selector">CSS-селектор / текст</label>
+                <input type="text" id="selector" name="selector" class="form-input" value="{{ tracking.selector }}"
+                    required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="selector_type">Тип селектора</label>
+                <select id="selector_type" name="selector_type" class="form-select">
+                    <option value="css" {% if tracking.selector_type=='css' %}selected{% endif %}>CSS-селектор</option>
+                    <option value="text" {% if tracking.selector_type=='text' %}selected{% endif %}>Поиск текста
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="check_interval">Интервал проверки (минуты)</label>
+            <input type="number" id="check_interval" name="check_interval" class="form-input"
+                value="{{ tracking.check_interval_minutes }}" min="1" max="1440">
+            <p class="form-hint">От 1 до 1440 минут (24 часа)</p>
+        </div>
+
+        {% if tracking.last_value %}
+        <div class="form-group">
+            <label class="form-label">Последнее значение</label>
+            <div style="padding: 0.7rem 1rem; background: var(--bg-input); border-radius: var(--radius-sm);
+                        font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);
+                        word-break: break-all;">
+                {{ tracking.last_value[:500] }}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="btn-group" style="margin-top: 1rem;">
+            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+            <a href="/" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

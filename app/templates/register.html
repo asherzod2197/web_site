@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Регистрация — Веб-мониторинг{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="auth-logo">◉</span>
+            <h1 class="auth-title">Регистрация</h1>
+            <p class="auth-subtitle">Создайте аккаунт для мониторинга</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" required
+                    autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password">Пароль</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="Минимум 6 символов"
+                    required minlength="6" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password_confirm">Подтверждение пароля</label>
+                <input type="password" id="password_confirm" name="password_confirm" class="form-input"
+                    placeholder="Повторите пароль" required minlength="6" autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top: 0.5rem;">
+                Создать аккаунт
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Уже есть аккаунт? <a href="/login">Войти</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

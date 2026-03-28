@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Дашборд — Веб-мониторинг{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📊 Мои отслеживания</h1>
+    <p class="page-subtitle">Управляйте мониторингом веб-страниц</p>
+</div>
+
+{% if success %}
+<div class="alert alert-success">✅ {{ success }}</div>
+{% endif %}
+{% if error %}
+<div class="alert alert-error">⚠️ {{ error }}</div>
+{% endif %}
+
+<!-- Статистика -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-purple">📌</div>
+        <div>
+            <div class="stat-value">{{ trackings|length }}</div>
+            <div class="stat-label">Всего</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-green">✅</div>
+        <div>
+            <div class="stat-value">{{ trackings|selectattr('is_active')|list|length }}</div>
+            <div class="stat-label">Активных</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-yellow">🔔</div>
+        <div>
+            <div class="stat-value">{{ trackings|selectattr('is_changed')|list|length }}</div>
+            <div class="stat-label">Изменений</div>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Форма добавления -->
+    <div class="card">
+        <h2 class="card-title">➕ Добавить отслеживание</h2>
+        <form method="POST" action="/tracking/add">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="url">URL страницы</label>
+                    <input type="url" id="url" name="url" class="form-input" placeholder="https://example.com/page"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="name">Название (необязательно)</label>
+                    <input type="text" id="name" name="name" class="form-input"
+                        placeholder="Цена iPhone, Статус заказа...">
+                </div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label" for="selector">CSS-селектор / текст</label>
+                    <input type="text" id="selector" name="selector" class="form-input"
+                        placeholder=".price, #status, h1" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="selector_type">Тип</label>
+                    <select id="selector_type" name="selector_type" class="form-select">
+                        <option value="css">CSS-селектор</option>
+                        <option value="text">Поиск текста</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="check_interval">Интервал (мин)</label>
+                    <input type="number" id="check_interval" name="check_interval" class="form-input" value="10" min="1"
+                        max="1440">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                ➕ Добавить
+            </button>
+        </form>
+    </div>
+
+    <!-- Таблица отслеживаний -->
+    <div class="card">
+        <h2 class="card-title">📋 Таблица отслеживаний</h2>
+
+        {% if trackings %}
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>URL</th>
+                        <th>Селектор</th>
+                        <th>Последнее значение</th>
+                        <th>Проверено</th>
+                        <th>Статус</th>
+                        <th>Состояние</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in trackings %}
+                    <tr>
+                        <td><strong>{{ t.name or '—' }}</strong></td>
+                        <td class="url-text">
+                            <a href="{{ t.url }}" target="_blank" title="{{ t.url }}">
+                                {{ t.url[:40] }}{% if t.url|length > 40 %}...{% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <code style="font-size:0.8rem; color: var(--accent-secondary);">
+                                {{ t.selector[:25] }}{% if t.selector|length > 25 %}...{% endif %}
+                            </code>
+                        </td>
+                        <td class="value-text" title="{{ t.last_value or '' }}">
+                            {{ (t.last_value or '—')[:40] }}
+                        </td>
+                        <td class="time-text">
+                            {% if t.last_checked %}
+                            {{ t.last_checked.strftime('%d.%m.%Y %H:%M') }}
+                            {% else %}
+                            Ещё нет
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if t.is_changed %}
+                            <span class="badge badge-success">✅ Изменено</span>
+                            {% elif t.last_checked %}
+                            <span class="badge badge-neutral">— Без изменений</span>
+                            {% else %}
+                            <span class="badge badge-warning">⏳ Ожидание</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if t.is_active %}
+                            <span class="badge badge-active">● Активно</span>
+                            {% else %}
+                            <span class="badge badge-inactive">○ Пауза</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="/tracking/{{ t.id }}/edit" class="btn btn-secondary btn-sm"
+                                    title="Редактировать">✏️</a>
+                                <form method="POST" action="/tracking/{{ t.id }}/toggle" style="display:inline">
+                                    <button type="submit" class="btn btn-secondary btn-sm"
+                                        title="{% if t.is_active %}Приостановить{% else %}Активировать{% endif %}">
+                                        {% if t.is_active %}⏸️{% else %}▶️{% endif %}
+                                    </button>
+                                </form>
+                                <form method="POST" action="/tracking/{{ t.id }}/delete" style="display:inline">
+                                    <button type="submit" class="btn btn-danger btn-sm btn-delete"
+                                        title="Удалить">🗑️</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-text">Нет отслеживаний</div>
+            <div class="empty-state-hint">Добавьте URL и CSS-селектор элемента для мониторинга</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
